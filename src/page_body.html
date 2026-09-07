@@ -1,0 +1,187 @@
+<div class="page">
+<header>
+  <div class="title-wrap">
+    <span class="eyebrow">GBIF occurrence records &nbsp;×&nbsp; ERA5 reanalysis &nbsp;·&nbsp; 2000–2024</span>
+    <h1>Ahead of Season</h1>
+    <p class="lede">Birds don't read a calendar. They read the weather. This lines up
+      <b>25 springs of sightings</b> against <b>the temperature each of those springs actually had</b> —
+      then lets you re-sort the years by warmth instead of by number, and see whether the
+      arrivals fall into line.</p>
+  </div>
+  <div class="hdr-right">
+    <div class="seg" role="group" aria-label="Colour theme">
+      <button data-theme-set="auto" aria-pressed="true">Auto</button>
+      <button data-theme-set="light" aria-pressed="false">Light</button>
+      <button data-theme-set="dark" aria-pressed="false">Dark</button>
+    </div>
+    <div class="seg" role="group" aria-label="Explanation level">
+      <button id="plainBtn" aria-pressed="false">Plain English</button>
+    </div>
+  </div>
+</header>
+
+<section class="rail">
+  <div class="field">
+    <div class="field-label"><span class="eyebrow">Species</span>
+      <a id="gbifLink" class="mono" style="font-size:11px" href="#" target="_blank" rel="noopener">GBIF record ↗</a></div>
+    <div class="chips" id="speciesChips"></div>
+  </div>
+  <div class="field">
+    <div class="field-label"><span class="eyebrow">Place</span>
+      <span class="mono" id="placeBox" style="font-size:11px;color:var(--muted)"></span></div>
+    <div class="chips" id="placeChips"></div>
+  </div>
+  <div class="field">
+    <div class="field-label"><span class="eyebrow">Call it &ldquo;arrived&rdquo; at</span>
+      <span class="mono" id="pctOut" style="font-size:12px;font-weight:600">15%</span></div>
+    <input type="range" id="pct" min="5" max="50" step="1" value="15" aria-label="Arrival percentile">
+    <p class="hint">The day this share of the season's effort-corrected sightings has
+      accumulated. Low = the scouts. High = the whole flock.</p>
+  </div>
+  <div class="field">
+    <span class="eyebrow">Order the years by</span>
+    <div class="seg" role="group" aria-label="Year ordering">
+      <button id="sortCal" aria-pressed="true">Calendar</button>
+      <button id="sortWarm" aria-pressed="false">Spring warmth</button>
+    </div>
+    <p class="hint" id="sortHint">Switch to warmth and watch the ticks.</p>
+  </div>
+</section>
+
+<main class="grid">
+  <section class="panel">
+    <div class="panel-head">
+      <h2 id="ladderTitle">Twenty-five springs</h2>
+      <span class="eyebrow" id="ladderSub"></span>
+    </div>
+    <p class="readthis" id="readThis">Each row is one year, running <b>1 February</b> (left) to
+      <b>30 June</b> (right). The filled shape is how often this species turned up in the day's
+      birding, once the number of birders is divided out. The vertical tick is the arrival date.
+      Row colour is that spring's temperature — <span style="color:var(--cold);font-weight:600">cool</span>
+      to <span style="color:var(--warm);font-weight:600">warm</span>.</p>
+    <div class="scroll"><svg id="ladder" role="img" aria-label="Arrival curves for 25 springs"></svg></div>
+  </section>
+
+  <div class="right-col">
+    <section class="panel">
+      <div class="panel-head"><h2>Warmth against arrival</h2>
+        <span class="eyebrow">one dot = one spring</span></div>
+      <div class="stats" id="stats"></div>
+      <div id="verdict" class="verdict"></div>
+      <div class="scroll"><svg id="scatter" role="img" aria-label="Arrival date against spring temperature"></svg></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2>Does the method survive its own control?</h2></div>
+      <p class="hint">A resident bird never arrives — it is here all winter. If the method
+        reports <em>residents</em> shifting with warmth too, it is measuring birdwatchers, not
+        birds. Sorted by sensitivity in the selected place.</p>
+      <div class="scroll"><table id="controlTable"></table></div>
+    </section>
+  </div>
+</main>
+
+<section class="methods">
+  <h2>How this was made</h2>
+  <div class="method-grid">
+    <div class="method">
+      <h3>The two sources</h3>
+      <p>Sightings come from <b>GBIF</b>, the global pool of biodiversity records — mostly eBird
+        checklists and iNaturalist photos here. Weather comes from <b>Open-Meteo's ERA5
+        reanalysis</b>, which gives a daily temperature for any coordinate back to 1940.
+        Neither needs a key. Nothing here has been combined before in this workspace: the join
+        is <span class="mono">(box, day)</span> — a sighting happened at a place on a date, and
+        that place had a temperature on that date.</p>
+      <div class="plain">Two free public datasets. One says where and when animals were seen.
+        The other says what the weather was there. This puts them side by side.</div>
+    </div>
+    <div class="method">
+      <h3>Dividing out the birdwatchers</h3>
+      <p>Raw sighting counts are useless across years: this area logged <b>210</b> hummingbird
+        records in 2000 and <b>13,261</b> in 2024. That is a change in observers, not in birds.
+        So every count is divided by <b>all bird records in the same box on the same day</b> —
+        the same query with the species filter swapped for class <span class="mono">Aves</span>.
+        What is plotted is a <em>detection frequency</em>: of the birding done that day, what
+        share found this species.</p>
+      <div class="plain">Far more people report birds now than in 2000. If we counted raw
+        sightings, every species would look like it was exploding. Instead we ask: out of all
+        the birds people reported that day, how many were this one?</div>
+    </div>
+    <div class="method">
+      <h3>What counts as arriving</h3>
+      <p>There is no single right answer, which is why it is a slider rather than a number. The
+        arrival date is the day the season's running total of effort-corrected sightings first
+        crosses your chosen share, interpolated between days. A low percentile tracks the first
+        scouts and is jumpy; a high one tracks the bulk of the population and is steadier.
+        A year is skipped when it holds fewer than <b>25</b> records in the window.</p>
+      <div class="plain">You pick how much of the flock has to show up before we call it
+        "arrived." Move the slider and every number on the page recomputes.</div>
+    </div>
+    <div class="method">
+      <h3>Measuring the spring</h3>
+      <p>Spring warmth is the <b>mean daily temperature over March and April</b> at the box's
+        centre. The panel also carries <b>growing degree days</b> (accumulated warmth above
+        10&nbsp;°C from 1 January), the measure plants actually respond to, and the day that
+        total first reaches 100 — a thermal spring date. Across these 25 years the degree-day
+        total ranges more than threefold.</p>
+      <div class="plain">"How warm was that spring" measured three ways — average temperature,
+        total accumulated warmth, and the date warmth arrived.</div>
+    </div>
+    <div class="method">
+      <h3>Why some migrants ignore a warm spring</h3>
+      <p>The species that respond most here are the ones that winter closest. A
+        <b>Tree Swallow</b> winters along the Gulf and can read the same spring the trees are
+        reading. A <b>Ruby-throated Hummingbird</b> is in Central America in February, where a
+        mild March in Maryland is invisible; it leaves on <b>daylength</b>, which is identical
+        every year. So a flat line for a long-distance migrant is not the method failing —
+        it is the constraint that makes phenological mismatch a live worry, because the insects
+        those birds arrive to eat <em>do</em> track local warmth.</p>
+      <div class="plain">Birds that spend winter nearby can feel an early spring coming. Birds
+        wintering in the tropics can't — they leave on schedule no matter what. That gap is why
+        warming springs worry ecologists.</div>
+    </div>
+    <div class="method">
+      <h3>The control drift, and where it fires</h3>
+      <p>The residents are not decoration — they are the instrument's zero. Their slope is
+        subtracted from every migrant's before the verdict is written, and when it strays past
+        <b>0.4 days/°C</b> the place is flagged instead of reported. That flag fires in
+        <b>Boston</b>, where both residents drift about <b>+0.7 days/°C</b>. Residents cannot
+        arrive, so that number is not migration; it is most likely warm springs changing when
+        and where people go birding. Washington and Atlanta come in near zero and can be read
+        at face value.</p>
+      <div class="plain">Two of the birds here never migrate, so any "arrival shift" they show
+        is pure measurement error. In Boston they show a big one — so Boston's numbers get a
+        warning label instead of a conclusion.</div>
+    </div>
+    <div class="method">
+      <h3>What it cannot tell you</h3>
+      <p>This is a <b>correlation across years, not a causal claim</b>, and the sightings are
+        opportunistic — people bird where it is pleasant, and warm mornings pull them outdoors,
+        which the effort correction reduces but cannot erase. Records before roughly 2010 are
+        thin. Reanalysis is a model, not the thermometer down the road. And a shared key means
+        a join is <em>possible</em>, never that it is meaningful — the resident controls are
+        there precisely to test that.</p>
+      <div class="plain">This shows things moving together. It does not prove the warmth caused
+        the birds to move. The control species are the honesty check.</div>
+    </div>
+    <div class="method">
+      <h3>Where 2025 went</h3>
+      <p>The window stops at <b>2024</b> on purpose. GBIF held only <b>422</b> hummingbird
+        records for this area in 2025 against 13,261 in 2024 — not an empty spring, but the
+        lag before eBird's annual export lands in GBIF. Plotted uncritically it would have
+        drawn a dramatic and entirely fictional early arrival. Incomplete years are excluded
+        rather than shown thin.</p>
+      <div class="plain">The most recent year's data hasn't finished loading into the database
+        yet, so including it would have invented a fake result. It's left out.</div>
+    </div>
+  </div>
+  <div class="foot">
+    <span>Sightings: <a href="https://www.gbif.org" target="_blank" rel="noopener">GBIF</a>
+      — per-record licences, CC0/CC-BY/CC-BY-NC</span>
+    <span>Weather: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>
+      ERA5, CC-BY-4.0</span>
+    <span class="mono" id="builtOn"></span>
+    <span>Click any year to open its underlying GBIF search.</span>
+  </div>
+</section>
+</div>
